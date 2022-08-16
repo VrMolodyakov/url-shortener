@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"strconv"
 
+	"github.com/VrMolodyakov/url-shortener/internal/service/shortener"
 	"github.com/VrMolodyakov/url-shortener/pkg/logging"
 	"github.com/go-redis/redis"
 )
@@ -17,20 +18,22 @@ func NewUrlRepository(logger *logging.Logger, client *redis.Client) *urlReposito
 	return &urlRepository{logger: logger, client: client}
 }
 
-func (u *urlRepository) Save(url string) error {
-	u.logger.Info("try to save %v", url)
-	var id string
+func (u *urlRepository) Save(url string) (string, error) {
+	u.logger.Infof("try to save %v", url)
+	var id uint64
 	for used := true; used; used = u.isExists(id) {
-		id = strconv.FormatUint(rand.Uint64(), 10)
+		id = rand.Uint64()
 	}
-	return u.client.Set(id, url, 0).Err()
+	err := u.client.Set(strconv.FormatUint(id, 10), url, 0).Err()
+	return shortener.Encode(id), err
 }
 
 func (u *urlRepository) Get(shortUrl string) (string, error) {
+	id := shortener.Decode(shortUrl)
 	u.logger.Info("try to get %v", shortUrl)
-	return u.client.Get(shortUrl).Result()
+	return u.client.Get(strconv.FormatUint(id, 10)).Result()
 }
 
-func (u *urlRepository) isExists(id string) bool {
-	return u.client.Exists(id).Val() != 0
+func (u *urlRepository) isExists(id uint64) bool {
+	return u.client.Exists(strconv.FormatUint(id, 10)).Val() != 0
 }

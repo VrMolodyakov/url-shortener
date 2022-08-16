@@ -37,15 +37,14 @@ func Encode(num uint64) string {
 	return string(b)
 }
 
-func Decode(token string) int {
-	r := 0
+func Decode(token string) uint64 {
+	var r uint64
 	charPos := float64(len(token)) - 1
 	alphabetSize := float64(len(alphabet))
 	for i := 0; i < len(token); i++ {
 		symb := string(token[i])
-		r += strings.Index(alphabet, symb) * int(math.Pow(alphabetSize, charPos))
+		r += uint64(strings.Index(alphabet, symb)) * uint64(math.Pow(alphabetSize, charPos))
 		charPos--
 	}
-
 	return r
 }
