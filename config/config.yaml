@@ -1,5 +1,7 @@
 loglvl: debug
 
+port : 8080
+
 redis:
   host: redis
   port: 6379

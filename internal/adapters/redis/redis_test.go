@@ -1,6 +1,8 @@
 package redis
 
 import (
+	"math/rand"
+	"strconv"
 	"testing"
 
 	"github.com/VrMolodyakov/url-shortener/pkg/logging"
@@ -67,6 +69,7 @@ func TestGetUrl(t *testing.T) {
 		input   string
 		isError bool
 		mock    mockCall
+		want    string
 	}{
 		{
 			title:   "should save successfully",
@@ -75,12 +78,14 @@ func TestGetUrl(t *testing.T) {
 			mock: func(input string) (string, error) {
 				return repo.Save(input)
 			},
+			want: "try to save it",
 		},
 		{
 			title:   "Get doens't find key and should return error",
 			input:   "try to save it",
 			isError: true,
 			mock: func(input string) (string, error) {
+				repo.Save(input)
 				return "wrong key", nil
 			},
 		},
@@ -108,6 +113,47 @@ func TestGetUrl(t *testing.T) {
 		})
 	}
 
+}
+
+func TestIsExist(t *testing.T) {
+	setUp()
+	defer teardown()
+	logger := logging.GetLogger("debug")
+	repo := NewUrlRepository(logger, redisClient)
+	type mockCall func(string) uint64
+	testCases := []struct {
+		title string
+		input string
+		want  bool
+		mock  mockCall
+	}{
+		{
+			title: "id exists and isExist should return true",
+			input: "request url",
+			want:  true,
+			mock: func(url string) uint64 {
+				id := rand.Uint64()
+				redisClient.Set(strconv.FormatUint(id, 10), url, 0)
+				return id
+			},
+		},
+		{
+			title: "id doesn't exist and isExist should return false",
+			input: "request url",
+			want:  false,
+			mock: func(url string) uint64 {
+				id := rand.Uint64()
+				return id
+			},
+		},
+	}
+	for _, test := range testCases {
+		t.Run(test.title, func(t *testing.T) {
+			id := test.mock(test.input)
+			got := repo.IsExists(id)
+			assert.Equal(t, test.want, got)
+		})
+	}
 }
 
 func setUp() {

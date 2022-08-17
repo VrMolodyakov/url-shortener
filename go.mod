@@ -14,6 +14,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.23.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gomodule/redigo v1.8.9 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.20.0 // indirect

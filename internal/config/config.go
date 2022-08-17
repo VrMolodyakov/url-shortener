@@ -3,16 +3,17 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"sync"
 
-	"github.com/VrMolodyakov/url-shortener/pkg/logging"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	LogLvl string `yaml : "loglvl"`
+	Loglvl string `yaml : "loglvl"`
+	Port   int    `yaml : "port"`
 	Redis  Redis  `yaml : "redis"`
 }
 
@@ -33,21 +34,20 @@ func GetConfig() *Config {
 		root := filepath.Dir(filepath.Dir(path))
 		fmt.Println("dir2:", root)
 		instance = &Config{}
-		logger := logging.GetLogger("info")
-		logger.Info("start config initialisation")
+		log.Println("start config initialisation")
 		configPath := root + "\\config\\config.yaml"
 		dockerPath, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 		if exist, _ := Exists(configPath); exist {
 			if err := cleanenv.ReadConfig(root+"\\config\\config.yaml", instance); err != nil {
 				help, _ := cleanenv.GetDescription(instance, nil)
-				logger.Info(help)
-				logger.Fatal(err)
+				log.Println(help)
+				log.Println(err)
 			}
 		} else if exist, _ := Exists(dockerPath + "/config/config.yaml"); exist {
 			if err := cleanenv.ReadConfig(dockerPath+"/config/config.yaml", instance); err != nil {
 				help, _ := cleanenv.GetDescription(instance, nil)
-				logger.Info(help)
-				logger.Fatal(err)
+				log.Println(help)
+				log.Println(err)
 			}
 		}
 

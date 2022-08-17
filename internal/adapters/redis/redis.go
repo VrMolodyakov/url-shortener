@@ -21,7 +21,7 @@ func NewUrlRepository(logger *logging.Logger, client *redis.Client) *urlReposito
 func (u *urlRepository) Save(url string) (string, error) {
 	u.logger.Infof("try to save %v", url)
 	var id uint64
-	for used := true; used; used = u.isExists(id) {
+	for used := true; used; used = u.IsExists(id) {
 		id = rand.Uint64()
 	}
 	err := u.client.Set(strconv.FormatUint(id, 10), url, 0).Err()
@@ -34,6 +34,6 @@ func (u *urlRepository) Get(shortUrl string) (string, error) {
 	return u.client.Get(strconv.FormatUint(id, 10)).Result()
 }
 
-func (u *urlRepository) isExists(id uint64) bool {
+func (u *urlRepository) IsExists(id uint64) bool {
 	return u.client.Exists(strconv.FormatUint(id, 10)).Val() != 0
 }
