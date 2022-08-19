@@ -1,6 +1,7 @@
-package redis
+package urlDb
 
 import (
+	"errors"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -22,21 +23,25 @@ func TestUrlSave(t *testing.T) {
 	logger := logging.GetLogger("debug")
 	repo := NewUrlRepository(logger, redisClient)
 	type mockCall func()
+	type args struct {
+		id  string
+		url string
+	}
 	testCases := []struct {
 		title   string
-		input   string
+		input   args
 		isError bool
 		mock    mockCall
 	}{
 		{
 			title:   "should save successfully",
-			input:   "url to save",
+			input:   args{id: "id", url: "url"},
 			isError: false,
 			mock:    func() {},
 		},
 		{
 			title:   "should doesn't save and return error ",
-			input:   "url to save",
+			input:   args{id: "id", url: "url"},
 			isError: true,
 			mock: func() {
 				redisServer.SetError("interanl redis error")
@@ -46,8 +51,7 @@ func TestUrlSave(t *testing.T) {
 	for _, test := range testCases {
 		t.Run(test.title, func(t *testing.T) {
 			test.mock()
-			short, err := repo.Save(test.input)
-			t.Log(short)
+			err := repo.Save(test.input.id, test.input.url)
 			if test.isError == true {
 				assert.Error(t, err)
 			} else {
@@ -63,49 +67,52 @@ func TestGetUrl(t *testing.T) {
 	defer teardown()
 	logger := logging.GetLogger("debug")
 	repo := NewUrlRepository(logger, redisClient)
-	type mockCall func(string) (string, error)
+	type mockCall func(string, string) error
+	type args struct {
+		id  string
+		url string
+	}
 	testCases := []struct {
 		title   string
-		input   string
+		input   args
 		isError bool
 		mock    mockCall
 		want    string
 	}{
 		{
 			title:   "should save successfully",
-			input:   "try to save it",
+			input:   args{id: "id", url: "url"},
 			isError: false,
-			mock: func(input string) (string, error) {
-				return repo.Save(input)
+			mock: func(id string, url string) error {
+				return repo.Save(id, url)
 			},
 			want: "try to save it",
 		},
 		{
 			title:   "Get doens't find key and should return error",
-			input:   "try to save it",
+			input:   args{id: "wrong key to find", url: "url"},
 			isError: true,
-			mock: func(input string) (string, error) {
-				repo.Save(input)
-				return "wrong key", nil
+			mock: func(id string, url string) error {
+				return repo.Save("some key", url)
 			},
 		},
 		{
 			title:   "reddis internal error and Get return error ",
-			input:   "try to save it",
+			input:   args{id: "id", url: "url"},
 			isError: true,
-			mock: func(input string) (string, error) {
+			mock: func(id string, url string) error {
 				redisServer.SetError("interanl redis error")
-				return "good key", nil
+				return errors.New("internal error")
 			},
 		},
 	}
 	for _, test := range testCases {
 		t.Run(test.title, func(t *testing.T) {
-			key, _ := test.mock(test.input)
-			url, err := repo.Get(key)
+			_ = test.mock(test.input.id, test.input.url)
+			url, err := repo.Get(test.input.id)
 			if test.isError == false {
 				assert.Equal(t, err, nil)
-				assert.Equal(t, test.input, url)
+				assert.Equal(t, test.input.url, url)
 			} else {
 				assert.Error(t, err)
 			}

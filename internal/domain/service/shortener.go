@@ -17,7 +17,8 @@ func NewShortener(logger *logging.Logger) *shortener {
 
 const alphabet string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-func Encode(num uint64) string {
+func (s *shortener) Encode(num uint64) string {
+
 	b := make([]byte, 0)
 	size := uint64(len(alphabet))
 	if num == 0 {
@@ -37,7 +38,7 @@ func Encode(num uint64) string {
 	return string(b)
 }
 
-func Decode(token string) uint64 {
+func (s *shortener) Decode(token string) uint64 {
 	var r uint64
 	charPos := float64(len(token)) - 1
 	alphabetSize := float64(len(alphabet))

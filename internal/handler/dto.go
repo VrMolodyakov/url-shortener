@@ -1,9 +1,10 @@
 package handler
 
 type UrlRequest struct {
-	Url string `json:"url"`
+	FullUrl string `json:"url"`
 }
 
 type UrlResponse struct {
 	ShortUrl string `json:"shortUrl"`
+	FullUrl  string `json:"fulltUrl"`
 }

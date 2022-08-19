@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -16,5 +15,4 @@ func main() {
 	logger := logging.GetLogger(cfg.Loglvl)
 	app := internal.NewApp(logger, cfg)
 	app.Run()
-	fmt.Println(cfg)
 }

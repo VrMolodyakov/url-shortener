@@ -10,11 +10,11 @@ import (
 type rdConfig struct {
 	Password string
 	Host     string
-	Port     int
+	Port     string
 	DbNumber int
 }
 
-func GetRdConfig(password string, host string, port int, dbNumber int) rdConfig {
+func GetRdConfig(password string, host string, port string, dbNumber int) rdConfig {
 	return rdConfig{
 		Password: password,
 		Host:     host,
@@ -24,7 +24,7 @@ func GetRdConfig(password string, host string, port int, dbNumber int) rdConfig 
 }
 
 func NewClient(ctx context.Context, cfg *rdConfig) (*redis.Client, error) {
-	address := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	address := fmt.Sprintf("%v:%v", cfg.Host, cfg.Port)
 	client := redis.NewClient(
 		&redis.Options{
 			Addr:     address,
