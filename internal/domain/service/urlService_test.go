@@ -112,7 +112,7 @@ func TestCreateCustomUrl(t *testing.T) {
 			isError: true,
 		},
 		{
-			title: "custom url is exist and should return error",
+			title: "custom url is already exist and should return error",
 			input: args{customUrl: "custom url", url: "full url"},
 			mock: func() {
 				var randomId uint64 = 42424242
