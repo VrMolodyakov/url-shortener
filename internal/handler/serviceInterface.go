@@ -1,6 +1,7 @@
 package handler
 
 type UrlService interface {
-	GetFullUrl(shortUrl string) (string, error)
-	CreateShortUrl(url string) (string, error)
+	GetUrl(shortUrl string) (string, error)
+	CreateUrl(url string) (string, error)
+	CreateCustomUrl(customUrl string, url string) (string, error)
 }

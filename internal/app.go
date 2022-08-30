@@ -44,14 +44,16 @@ func (a *app) initialize() {
 	a.checkErr(err)
 	repo := urlDb.NewUrlRepository(a.logger, rdClient)
 	shortener := service.NewShortener(a.logger)
-	urlService := service.NewUrlRepository(repo, shortener)
+	urlService := service.NewUrlService(repo, shortener)
 	a.router = mux.NewRouter()
 	a.initializeRouters(urlService)
 }
 
 func (a *app) initializeRouters(service handler.UrlService) {
 	h := handler.NewUrlHandler(a.logger, service)
-	a.router.HandleFunc("/encode", h.Encode)
+	a.router.HandleFunc("/encode", h.EncodeUrl).Methods(http.MethodPost)
+	a.router.HandleFunc("/{shortUrl}", h.DecodeUrl).Methods(http.MethodGet)
+	a.router.HandleFunc("/encode/custom", h.EncodeCustomUrl).Methods(http.MethodPost)
 }
 
 func (a *app) checkErr(err error) {

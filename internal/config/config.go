@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -30,9 +29,7 @@ var once sync.Once
 func GetConfig() *Config {
 	once.Do(func() {
 		path, _ := os.Getwd()
-		fmt.Println("path:", path)
 		root := filepath.Dir(filepath.Dir(path))
-		fmt.Println("dir2:", root)
 		instance = &Config{}
 		log.Println("start config initialisation")
 		configPath := root + "\\config\\config.yaml"

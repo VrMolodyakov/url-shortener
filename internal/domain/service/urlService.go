@@ -23,19 +23,27 @@ type urlService struct {
 	shortener Shortener
 }
 
-func NewUrlRepository(repo UrlRepository, shortener Shortener) *urlService {
+func NewUrlService(repo UrlRepository, shortener Shortener) *urlService {
 	return &urlService{repo: repo, shortener: shortener}
 }
 
-func (u *urlService) GetFullUrl(shortUrl string) (string, error) {
-	fullUrl, err := u.repo.Get(shortUrl)
+func (u *urlService) GetUrl(shortUrl string) (string, error) {
+	if shortUrl == "" {
+		return shortUrl, errs.ErrUrlIsEmpty
+	}
+	id := u.shortener.Decode(shortUrl)
+	key := strconv.FormatUint(id, 10)
+	fullUrl, err := u.repo.Get(key)
 	if err != nil {
 		return "", errs.ErrUrlNotFound
 	}
 	return fullUrl, nil
 }
 
-func (u *urlService) CreateShortUrl(url string) (string, error) {
+func (u *urlService) CreateUrl(url string) (string, error) {
+	if url == "" {
+		return url, errs.ErrUrlIsEmpty
+	}
 	var id uint64
 	for used := true; used; used = u.repo.IsExists(id) {
 		id = rand.Uint64()
@@ -44,5 +52,21 @@ func (u *urlService) CreateShortUrl(url string) (string, error) {
 	if err != nil {
 		return "", errs.ErrUrlNotSaved
 	}
-	return u.shortener.Encode(id), err
+	return u.shortener.Encode(id), nil
+}
+
+func (u *urlService) CreateCustomUrl(customUrl string, url string) (string, error) {
+	if url == "" || customUrl == "" {
+		return url, errs.ErrUrlIsEmpty
+	}
+	id := u.shortener.Decode(customUrl)
+	if u.repo.IsExists(id) {
+		return "", errs.ErrUrlNotSaved
+	}
+	err := u.repo.Save(strconv.FormatUint(id, 10), url)
+	if err != nil {
+		return "", errs.ErrUrlNotSaved
+	}
+	return customUrl, nil
+
 }

@@ -7,6 +7,11 @@ import (
 	"github.com/go-redis/redis"
 )
 
+const (
+	short string = "short"
+	full  string = "long"
+)
+
 type urlRepository struct {
 	logger *logging.Logger
 	client *redis.Client
@@ -25,9 +30,9 @@ func (u *urlRepository) Save(id string, url string) error {
 	return nil
 }
 
-func (u *urlRepository) Get(shortUrl string) (string, error) {
-	u.logger.Info("try to get %v", shortUrl)
-	url, err := u.client.Get(shortUrl).Result()
+func (u *urlRepository) Get(key string) (string, error) {
+	u.logger.Info("try to get %v", key)
+	url, err := u.client.Get(key).Result()
 	if err != nil {
 		u.logger.Errorf("cannot get full url for short url = %v due to ", err)
 		return "", err
