@@ -139,10 +139,9 @@ func TestCreateCustomUrl(t *testing.T) {
 	for _, test := range testCases {
 		t.Run(test.title, func(t *testing.T) {
 			test.mock()
-			got, err := urlService.CreateCustomUrl(test.input.customUrl, test.input.url)
+			err := urlService.CreateCustomUrl(test.input.customUrl, test.input.url)
 			if !test.isError {
 				assert.NoError(t, err)
-				assert.Equal(t, got, test.want)
 			} else {
 				assert.Error(t, err)
 			}
@@ -163,7 +162,7 @@ func TestGetUrl(t *testing.T) {
 		isError bool
 	}{
 		{
-			title: "successful url acquisition",
+			title: "successful url receiving",
 			input: "https://some-short-url",
 			mock: func() {
 				var randomId uint64 = 42424242

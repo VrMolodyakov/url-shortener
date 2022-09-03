@@ -55,18 +55,18 @@ func (u *urlService) CreateUrl(url string) (string, error) {
 	return u.shortener.Encode(id), nil
 }
 
-func (u *urlService) CreateCustomUrl(customUrl string, url string) (string, error) {
+func (u *urlService) CreateCustomUrl(customUrl string, url string) error {
 	if url == "" || customUrl == "" {
-		return url, errs.ErrUrlIsEmpty
+		return errs.ErrUrlIsEmpty
 	}
 	id := u.shortener.Decode(customUrl)
 	if u.repo.IsExists(id) {
-		return "", errs.ErrUrlNotSaved
+		return errs.ErrUrlNotSaved
 	}
 	err := u.repo.Save(strconv.FormatUint(id, 10), url)
 	if err != nil {
-		return "", errs.ErrUrlNotSaved
+		return errs.ErrUrlNotSaved
 	}
-	return customUrl, nil
+	return nil
 
 }
