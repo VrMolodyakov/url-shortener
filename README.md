@@ -28,7 +28,7 @@ make test
 ```
 http://localhost:8080/encode
 ```
-#### To encode url
+### To encode url
 
 ------------
 
@@ -59,7 +59,7 @@ Response :
 ```
 http://localhost:8080/encode
 ```
-#### To shorten with a custom link
+### To shorten with a custom link
 
 ------------
 
