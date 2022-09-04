@@ -2,9 +2,12 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"log"
 	"net/http"
+	"os"
+	"syscall"
+	"time"
 
 	"github.com/VrMolodyakov/url-shortener/internal/adapters/db/urlDb"
 	"github.com/VrMolodyakov/url-shortener/internal/config"
@@ -12,7 +15,13 @@ import (
 	"github.com/VrMolodyakov/url-shortener/internal/handler"
 	"github.com/VrMolodyakov/url-shortener/pkg/client/redis"
 	"github.com/VrMolodyakov/url-shortener/pkg/logging"
+	"github.com/VrMolodyakov/url-shortener/pkg/shutdown"
 	"github.com/gorilla/mux"
+)
+
+const (
+	writeTimeout = 15 * time.Second
+	readTimeout  = 15 * time.Second
 )
 
 type app struct {
@@ -31,13 +40,6 @@ func (a *app) Run() {
 
 func (a *app) startHttp() {
 	a.logger.Info("start http server")
-	a.initialize()
-	a.logger.Info("start listening...")
-	port := fmt.Sprintf(":%v", a.cfg.Port)
-	log.Fatal(http.ListenAndServe(port, a.router))
-}
-
-func (a *app) initialize() {
 	a.logger.Debug("start init handler")
 	rdCfg := redis.GetRdConfig(a.cfg.Redis.Password, a.cfg.Redis.Host, a.cfg.Redis.Port, a.cfg.Redis.DbNumber)
 	rdClient, err := redis.NewClient(context.Background(), &rdCfg)
@@ -46,14 +48,27 @@ func (a *app) initialize() {
 	shortener := service.NewShortener(a.logger)
 	urlService := service.NewUrlService(repo, shortener)
 	a.router = mux.NewRouter()
-	a.initializeRouters(urlService)
-}
-
-func (a *app) initializeRouters(service handler.UrlService) {
-	h := handler.NewUrlHandler(a.logger, service)
-	a.router.HandleFunc("/encode", h.EncodeUrl).Methods(http.MethodPost)
-	a.router.HandleFunc("/{shortUrl}", h.DecodeUrl).Methods(http.MethodGet)
-	a.router.HandleFunc("/encode/custom", h.EncodeCustomUrl).Methods(http.MethodPost)
+	handler := handler.NewUrlHandler(a.logger, urlService)
+	handler.InitRoutes(a.router)
+	a.logger.Info("start listening...")
+	port := fmt.Sprintf(":%s", a.cfg.Port)
+	server := &http.Server{
+		Addr:         port,
+		Handler:      a.router,
+		WriteTimeout: writeTimeout,
+		ReadTimeout:  readTimeout,
+	}
+	a.checkErr(err)
+	go shutdown.Graceful([]os.Signal{syscall.SIGABRT, syscall.SIGQUIT, syscall.SIGHUP, os.Interrupt, syscall.SIGTERM}, rdClient, server)
+	if err := server.ListenAndServe(); err != nil {
+		switch {
+		case errors.Is(err, http.ErrServerClosed):
+			a.logger.Warn("server shutdown")
+		default:
+			a.logger.Fatal(err)
+		}
+	}
+	a.logger.Info("app shutdown")
 }
 
 func (a *app) checkErr(err error) {
