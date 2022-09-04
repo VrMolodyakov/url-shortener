@@ -14,5 +14,6 @@ func main() {
 	cfg := config.GetConfig()
 	logger := logging.GetLogger(cfg.Loglvl)
 	app := internal.NewApp(logger, cfg)
+	logger.Info("start App")
 	app.Run()
 }
