@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/VrMolodyakov/url-shortener/internal/errs"
@@ -27,6 +28,7 @@ func (h *handler) EncodeUrl(w http.ResponseWriter, r *http.Request) {
 		errorResponse(w, err)
 		return
 	}
+	shortUrl = fmt.Sprintf("http://%v:%v/%v", h.host, h.port, shortUrl)
 	response := UrlResponse{ShortUrl: shortUrl, FullUrl: request.Url}
 	jsonReponce, err := json.MarshalIndent(response, prefix, indent)
 	if err != nil {
@@ -51,7 +53,8 @@ func (h *handler) EncodeCustomUrl(w http.ResponseWriter, r *http.Request) {
 		errorResponse(w, err)
 		return
 	}
-	response := UrlResponse{ShortUrl: request.Custom, FullUrl: request.Url}
+	shortUrl := fmt.Sprintf("http://%v:%v/%v", h.host, h.port, request.Custom)
+	response := UrlResponse{ShortUrl: shortUrl, FullUrl: request.Url}
 	jsonReponce, err := json.MarshalIndent(response, prefix, indent)
 	if err != nil {
 		errorResponse(w, err)

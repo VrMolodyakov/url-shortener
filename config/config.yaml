@@ -1,5 +1,5 @@
 loglvl: debug
-
+host: localhost
 port: 8080
 
 redis:

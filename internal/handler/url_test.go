@@ -18,7 +18,7 @@ func TestEncodeUrl(t *testing.T) {
 	router := mux.NewRouter()
 	ctrl := gomock.NewController(t)
 	urlService := mocks.NewMockUrlService(ctrl)
-	handler := NewUrlHandler(logging.GetLogger("debug"), urlService)
+	handler := NewUrlHandler(logging.GetLogger("debug"), urlService, "localhost", "8080")
 	handler.InitRoutes(router)
 	type mockCall func()
 	testCases := []struct {
@@ -77,7 +77,7 @@ func TestEncodeCustomUrl(t *testing.T) {
 	router := mux.NewRouter()
 	ctrl := gomock.NewController(t)
 	urlService := mocks.NewMockUrlService(ctrl)
-	handler := NewUrlHandler(logging.GetLogger("debug"), urlService)
+	handler := NewUrlHandler(logging.GetLogger("debug"), urlService, "localhost", "8080")
 	handler.InitRoutes(router)
 	type mockCall func()
 	testCases := []struct {
@@ -136,7 +136,7 @@ func TestDecodeUrl(t *testing.T) {
 	router := mux.NewRouter()
 	ctrl := gomock.NewController(t)
 	urlService := mocks.NewMockUrlService(ctrl)
-	handler := NewUrlHandler(logging.GetLogger("debug"), urlService)
+	handler := NewUrlHandler(logging.GetLogger("debug"), urlService, "localhost", "8080")
 	handler.InitRoutes(router)
 	type mockCall func()
 	testCases := []struct {

@@ -12,6 +12,7 @@ import (
 
 type Config struct {
 	Loglvl string `yaml : "loglvl"`
+	Host   string `yaml : "host"`
 	Port   string `yaml : "port"`
 	Redis  Redis  `yaml : "redis"`
 }

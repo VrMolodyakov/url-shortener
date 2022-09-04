@@ -48,7 +48,7 @@ func (a *app) startHttp() {
 	shortener := service.NewShortener(a.logger)
 	urlService := service.NewUrlService(repo, shortener)
 	a.router = mux.NewRouter()
-	handler := handler.NewUrlHandler(a.logger, urlService)
+	handler := handler.NewUrlHandler(a.logger, urlService, a.cfg.Host, a.cfg.Port)
 	handler.InitRoutes(a.router)
 	a.logger.Info("start listening...")
 	port := fmt.Sprintf(":%s", a.cfg.Port)

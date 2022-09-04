@@ -10,10 +10,12 @@ import (
 type handler struct {
 	logger     *logging.Logger
 	urlService UrlService
+	host       string
+	port       string
 }
 
-func NewUrlHandler(logger *logging.Logger, urlService UrlService) *handler {
-	return &handler{logger: logger, urlService: urlService}
+func NewUrlHandler(logger *logging.Logger, urlService UrlService, host string, port string) *handler {
+	return &handler{logger: logger, urlService: urlService, host: host, port: port}
 }
 
 func (h *handler) InitRoutes(router *mux.Router) {
